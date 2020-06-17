@@ -5,7 +5,7 @@ Imagine a system where hundreds of thousands of hardware devices are concurrentl
 
 The API to facilitate this system accepts creation of sensor records, in addition to retrieval.
 
-These `GET` and `POST` requests can be made at `/devices/<uuid>/readings/`.
+These `GET` and `POST` requests can be made at `/devices/<uuid>/readings`.
 
 Retrieval of sensor data should return a list of sensor values such as:
 
@@ -22,7 +22,7 @@ The API supports optionally querying by sensor type, in addition to a date range
 
 A client can also access metrics such as the max, median and mean over a time range.
 
-These metric requests can be made by a `GET` request to `/devices/<uuid>/readings/<metric>/`
+These metric requests can be made by a `GET` request to `/devices/<uuid>/readings/<metric>`
 
 When requesting max or median, a single sensor reading dictionary should be returned as seen above.
 
@@ -36,7 +36,7 @@ When requesting the mean, the response should be:
 
 The API also supports the retrieval of the 1st and 3rd quartile over a specific date range.
 
-This request can be made via a `GET` to `/devices/<uuid>/readings/quartiles/` and should return
+This request can be made via a `GET` to `/devices/<uuid>/readings/quartiles` and should return
 
 ```
     {
@@ -66,14 +66,19 @@ Finally, the API supports a summary endpoint for all devices and readings. When 
 The API is backed by a SQLite database.
 
 ## Getting Started
-This service requires Python3. To get started, create a virtual environment using Python3.
+This service requires Python3.7. To get started, create a virtual environment using Python3.7.
 
 Then, install the requirements using `pip install -r requirements.txt`.
 
 Finally, run the API via `python app.py`.
 
 ## Testing
-Tests can be run via `pytest -v`.
+Tests can be run via `pytest tests`.
+
+## Style guide and recommendations
+Some helpful conventions to follow when adding new features/Tests:
+- Use isort to order imports
+- Use flake8 for checking your code base against coding style
 
 ## Tasks
 Your task is to fork this repo and complete the following:
