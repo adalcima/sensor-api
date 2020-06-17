@@ -63,7 +63,23 @@ class SensorRoutesTestCase(unittest.TestCase):
         # Then we should receive a 200
         self.assertEqual(request.status_code, 200)
 
-        # And the response data should have three sensor readings
+        # And the response data should have four sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 4)
+
+        # And when we filter by humidity type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings?type=humidity'
+        )
+
+        # Then the response data should have 0 sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 0)
+
+        # And when we filter by end date using now
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings?end={int(time.time())}'
+        )
+
+        # Then the response data should have four sensor readings
         self.assertTrue(len(json.loads(request.data)) == 4)
 
     def test_device_readings_post(self):

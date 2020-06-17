@@ -72,7 +72,22 @@ def create_app(config_name=None):
             return 'success', 201
         else:
             # Execute the query
-            readings = Reading.query.all()
+            type = request.args.get('type')
+            start = request.args.get('start')
+            end = request.args.get('end')
+            readings = Reading.query
+            readings = readings.filter(Reading.device_uuid == device_uuid)
+
+            if type:
+                readings = readings.filter(Reading.type.like(f'%{type}%'))
+
+            if start:
+                readings = readings.filter(Reading.date_created >= int(start))
+
+            if end:
+                readings = readings.filter(Reading.date_created <= int(end))
+
+            readings = readings.all()
             results = []
 
             for reading in readings:
