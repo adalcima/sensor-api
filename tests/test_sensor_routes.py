@@ -77,6 +77,24 @@ class SensorRoutesTestCase(unittest.TestCase):
         # Then we should receive a 201
         self.assertEqual(request.status_code, 201)
 
+        # And when there is a missing field
+        request = self.client.post(
+            f'/devices/{self.device_uuid}/readings',
+            data=json.dumps({'type': 'temperature'}),
+        )
+
+        # Then we should receive a 400
+        self.assertEqual(request.status_code, 400)
+
+        # And when we send invalid value for temperature or humidity
+        request = self.client.post(
+            f'/devices/{self.device_uuid}/readings',
+            data=json.dumps({'type': 'temperature', 'value': 101}),
+        )
+
+        # Then we should receive a 400
+        self.assertEqual(request.status_code, 400)
+
         # And when we check for readings in the db
         rows = Reading.query.filter_by(device_uuid=self.device_uuid).count()
 

@@ -2,6 +2,7 @@ import json
 import time
 
 from api.config import app_config
+from api.validators import validate_sensor_value
 from flask import Flask, request
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -45,6 +46,17 @@ def create_app(config_name=None):
             sensor_type = post_data.get('type')
             value = post_data.get('value')
             date_created = post_data.get('date_created', int(time.time()))
+
+            # Field validation
+            if not all(
+                (
+                    sensor_type,
+                    value,
+                    date_created,
+                    validate_sensor_value(sensor_type, value),
+                )
+            ):
+                return 'Validation fields error', 400
 
             # Insert data into db
             reading = Reading(
