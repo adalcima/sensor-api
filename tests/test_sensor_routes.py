@@ -183,14 +183,6 @@ class SensorRoutesTestCase(unittest.TestCase):
         # Then the response data value should be 100
         self.assertEqual(json.loads(request.data)['value'], 48.5)
 
-    def test_device_readings_mode(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's mode sensor reading value.
-        """
-        # self.assertTrue(False)
-        pass
-
     def test_device_readings_quartiles(self):
         # Given a device UUID, start and end range
         start = int(time.time()) - 50000
@@ -204,6 +196,15 @@ class SensorRoutesTestCase(unittest.TestCase):
         # Then the quartile_1 should be 22 and quartile_3 should be 75
         self.assertEqual(json.loads(request.data)['quartile_1'], 22)
         self.assertEqual(json.loads(request.data)['quartile_3'], 75)
+
+    def test_device_readings(self):
+        # Given readings
+        # When we make a request to get readinds summary
+        request = self.client.get(f'/devices/readings')
+
+        # Then the response data should have one reading and number_of_readings value should be four
+        self.assertTrue(len(json.loads(request.data)) == 1)
+        self.assertEqual(json.loads(request.data)[0]['number_of_readings'], 4)
 
     def tearDown(self):
         db.session.remove()

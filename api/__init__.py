@@ -300,6 +300,54 @@ def create_app(config_name=None):
         * end -> The epoch end time for a sensor being created
         """
 
-        return 'Endpoint is not implemented', 501
+        type = request.args.get('type')
+        start = request.args.get('start')
+        end = request.args.get('end')
+
+        readings = db.session.query(
+            Reading.device_uuid.label('device_uuid'),
+            db.func.max(Reading.value).label('max_reading_value'),
+            db.func.avg(Reading.value).label('mean_reading_value'),
+            db.func.count(Reading.id).label('number_of_readings'),
+        )
+
+        if type:
+            readings = readings.filter(Reading.type.like(f'%{type}%'))
+
+        if start:
+            readings = readings.filter(Reading.date_created >= int(start))
+
+        if end:
+            readings = readings.filter(Reading.date_created <= int(end))
+
+        readings = readings.group_by(Reading.device_uuid).all()
+        results = []
+
+        for reading in readings:
+            # Get readings per UUID
+            readings_per_uuid = Reading.query.filter(
+                Reading.device_uuid == reading.device_uuid
+            ).all()
+
+            values = [reading.value for reading in readings_per_uuid]
+            median = get_median(values)
+            quartiles = get_quartiles(values)
+
+            obj = {
+                'device_uuid': reading.device_uuid,
+                'number_of_readings': reading.number_of_readings,
+                'max_reading_value': reading.max_reading_value,
+                'median_reading_value': median,
+                'mean_reading_value': reading.mean_reading_value,
+                'quartile_1_value': str(quartiles[0]),
+                'quartile_3_value': str(quartiles[1]),
+            }
+            results.append(obj)
+
+        # Return the JSON
+        return (
+            jsonify(results),
+            200,
+        )
 
     return app

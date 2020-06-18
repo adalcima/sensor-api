@@ -4,6 +4,7 @@ from statistics import median, StatisticsError
 def get_median(values):
     try:
         return median(values)
+
     except StatisticsError:
         return None
 
@@ -20,4 +21,8 @@ def get_quartiles(values):
         quartile_1 = get_median(sorted_values[:mid])
         quartile_3 = get_median(sorted_values[mid + 1 :])
 
-    return (int(quartile_1), int(quartile_3))
+    try:
+        return (int(quartile_1), int(quartile_3))
+
+    except TypeError:
+        return (None, None)
