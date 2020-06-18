@@ -66,22 +66,6 @@ class SensorRoutesTestCase(unittest.TestCase):
         # And the response data should have four sensor readings
         self.assertTrue(len(json.loads(request.data)) == 4)
 
-        # And when we filter by humidity type
-        request = self.client.get(
-            f'/devices/{self.device_uuid}/readings?type=humidity'
-        )
-
-        # Then the response data should have 0 sensor readings
-        self.assertTrue(len(json.loads(request.data)) == 0)
-
-        # And when we filter by end date using now
-        request = self.client.get(
-            f'/devices/{self.device_uuid}/readings?end={int(time.time())}'
-        )
-
-        # Then the response data should have four sensor readings
-        self.assertTrue(len(json.loads(request.data)) == 4)
-
     def test_device_readings_post(self):
         # Given a device UUID
         # When we make a request with the given UUID to create a reading
@@ -118,30 +102,34 @@ class SensorRoutesTestCase(unittest.TestCase):
         self.assertTrue(rows == 5)
 
     def test_device_readings_get_temperature(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's temperature data only.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID
+        # When we filter by temperature type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings?type=temperature'
+        )
+
+        # Then the response data should have four sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 4)
 
     def test_device_readings_get_humidity(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's humidity data only.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID
+        # When we filter by humidity type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings?type=humidity'
+        )
+
+        # Then the response data should have 0 sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 0)
 
     def test_device_readings_get_past_dates(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's sensor data over
-        a specific date range. We should only get the readings
-        that were created in this time range.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID
+        # When we filter by end date using now
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings?end={int(time.time())}'
+        )
+
+        # Then the response data should have four sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 4)
 
     def test_device_readings_min(self):
         """
@@ -152,28 +140,48 @@ class SensorRoutesTestCase(unittest.TestCase):
         pass
 
     def test_device_readings_max(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's max sensor reading.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID
+        # When we make a request to get max value by temperature type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings/max?type=temperature'
+        )
+
+        # Then the response data value should be 100
+        self.assertEqual(json.loads(request.data)[0]['value'], 100)
 
     def test_device_readings_median(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's median sensor reading.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID
+        # When we make a request to get median value by temperature type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings/median?type=temperature'
+        )
+
+        # Then the response data should have 0 sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 0)
+
+        # Given UUID to create new reading
+        request = self.client.post(
+            f'/devices/{self.device_uuid}/readings',
+            data=json.dumps({'type': 'temperature', 'value': 100}),
+        )
+
+        # When we make a request to get median value by temperature type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings/median?type=temperature'
+        )
+
+        # Then the response data should have one sensor readings
+        self.assertTrue(len(json.loads(request.data)) == 1)
 
     def test_device_readings_mean(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's mean sensor reading value.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID
+        # When we make a request to get mean value by temperature type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings/mean?type=temperature'
+        )
+
+        # Then the response data value should be 100
+        self.assertEqual(json.loads(request.data)['value'], 48.5)
 
     def test_device_readings_mode(self):
         """

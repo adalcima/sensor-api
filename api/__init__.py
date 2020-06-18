@@ -2,10 +2,12 @@ import json
 import time
 
 from api.config import app_config
+from api.helpers import get_median
 from api.validators import validate_sensor_value
 from flask import Flask, request
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_, func
 
 db = SQLAlchemy()
 
@@ -118,7 +120,46 @@ def create_app(config_name=None):
         * end -> The epoch end time for a sensor being created
         """
 
-        return 'Endpoint is not implemented', 501
+        type = request.args.get('type')
+        if not type:
+            return 'A type query parameter is required', 400
+
+        start = request.args.get('start')
+        end = request.args.get('end')
+        max_value = (
+            db.session.query(db.func.max(Reading.value))
+            .filter(
+                Reading.device_uuid == device_uuid,
+                Reading.type.like(f'%{type}%'),
+            )
+            .scalar()
+        )
+
+        readings = Reading.query
+        readings = readings.filter(Reading.value == max_value)
+        if start:
+            readings = readings.filter(Reading.date_created >= int(start))
+
+        if end:
+            readings = readings.filter(Reading.date_created <= int(end))
+
+        readings = readings.all()
+        results = []
+
+        for reading in readings:
+            obj = {
+                'device_uuid': reading.device_uuid,
+                'type': reading.type,
+                'value': reading.value,
+                'date_created': reading.date_created,
+            }
+            results.append(obj)
+
+        # Return the JSON
+        return (
+            jsonify(results),
+            200,
+        )
 
     @app.route(
         '/devices/<string:device_uuid>/readings/median', methods=['GET']
@@ -136,7 +177,41 @@ def create_app(config_name=None):
         * end -> The epoch end time for a sensor being created
         """
 
-        return 'Endpoint is not implemented', 501
+        type = request.args.get('type')
+        if not type:
+            return 'A type query parameter is required', 400
+
+        start = request.args.get('start')
+        end = request.args.get('end')
+        readings = Reading.query.filter(
+            Reading.device_uuid == device_uuid, Reading.type.like(f'%{type}%'),
+        )
+
+        if start:
+            readings = readings.filter(Reading.date_created >= int(start))
+
+        if end:
+            readings = readings.filter(Reading.date_created <= int(end))
+
+        readings = readings.all()
+        values = [reading.value for reading in readings]
+        median = get_median(values)
+        results = [
+            {
+                'device_uuid': reading.device_uuid,
+                'type': reading.type,
+                'value': reading.value,
+                'date_created': reading.date_created,
+            }
+            for reading in readings
+            if reading.value == median
+        ]
+
+        # Return the JSON
+        return (
+            jsonify(results),
+            200,
+        )
 
     @app.route('/devices/<string:device_uuid>/readings/mean', methods=['GET'])
     def request_device_readings_mean(device_uuid):
@@ -152,7 +227,29 @@ def create_app(config_name=None):
         * end -> The epoch end time for a sensor being created
         """
 
-        return 'Endpoint is not implemented', 501
+        type = request.args.get('type')
+        if not type:
+            return 'A type query parameter is required', 400
+
+        start = request.args.get('start')
+        end = request.args.get('end')
+        readings = db.session.query(db.func.avg(Reading.value)).filter(
+            Reading.device_uuid == device_uuid, Reading.type.like(f'%{type}%'),
+        )
+
+        if start:
+            readings = readings.filter(Reading.date_created >= int(start))
+
+        if end:
+            readings = readings.filter(Reading.date_created <= int(end))
+
+        mean_value = readings.scalar()
+        result = {'value': mean_value}
+
+        return (
+            jsonify(result),
+            200,
+        )
 
     @app.route(
         '/devices/<string:device_uuid>/readings/quartiles', methods=['GET']
