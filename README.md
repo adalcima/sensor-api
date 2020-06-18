@@ -80,6 +80,25 @@ Some helpful conventions to follow when adding new features/Tests:
 - Use isort to order imports
 - Use flake8 for checking your code base against coding style
 
+This will help us to have a better standardized code
+
+## Desig updates
+- Added flask_sqlalchemy, separate db configurations, create models file. This helps us to better manage the DB.
+- Remove trailing forward slash. This is one of the rules to follow when designing API's, since it can add confusion.
+
+
+## Features to prioritize
+Here are some features or updates we can prioritize
+- Migrate the SQLite DB. I would suggest to PostgreSQL.
+- Start versioning the API (v1, v2, etc).
+- Separate configurations and logic. Start using ENV variables.
+- Use flask_migrate and leave it the task of creating / updating DB.
+- In case the project grows in functionality, add Blueprint to group that functionality.
+- Implement logging management, in order to have a view of the API behavior.
+- Add docker configs to facilitate collaboration and code execution.
+- Create CI/CD workflow. To use for example with Jenkins.
+- Add test coverage, to monitor the scope of our tests.
+
 ## Tasks
 Your task is to fork this repo and complete the following:
 
