@@ -73,7 +73,7 @@ Then, install the requirements using `pip install -r requirements.txt`.
 Finally, run the API via `python app.py`.
 
 ## Testing
-Tests can be run via `pytest tests`.
+Tests can be run via `pytest tests`
 
 ## Style guide and recommendations
 Some helpful conventions to follow when adding new features/Tests:
