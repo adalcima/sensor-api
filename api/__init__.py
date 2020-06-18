@@ -2,12 +2,11 @@ import json
 import time
 
 from api.config import app_config
-from api.helpers import get_median
+from api.helpers import get_median, get_quartiles
 from api.validators import validate_sensor_value
 from flask import Flask, request
 from flask.json import jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_, func
 
 db = SQLAlchemy()
 
@@ -265,7 +264,29 @@ def create_app(config_name=None):
         * end -> The epoch end time for a sensor being created
         """
 
-        return 'Endpoint is not implemented', 501
+        type = request.args.get('type')
+        start = request.args.get('start')
+        end = request.args.get('end')
+        if not all((type, start, end,)):
+            return 'type, start and end query parameters are required', 400
+
+        readings = Reading.query.filter(
+            Reading.device_uuid == device_uuid,
+            Reading.type.like(f'%{type}%'),
+            Reading.date_created >= int(start),
+            Reading.date_created <= int(end),
+        )
+
+        readings = readings.all()
+        values = [reading.value for reading in readings]
+        quartiles = get_quartiles(values)
+
+        result = {'quartile_1': quartiles[0], 'quartile_3': quartiles[1]}
+
+        return (
+            jsonify(result),
+            200,
+        )
 
     @app.route('/devices/readings', methods=['GET'])
     def request_readings_summary():

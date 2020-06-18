@@ -192,13 +192,18 @@ class SensorRoutesTestCase(unittest.TestCase):
         pass
 
     def test_device_readings_quartiles(self):
-        """
-        This test should be implemented. The goal is to test that
-        we are able to query for a device's 1st and 3rd quartile
-        sensor reading value.
-        """
-        # self.assertTrue(False)
-        pass
+        # Given a device UUID, start and end range
+        start = int(time.time()) - 50000
+        end = int(time.time())
+
+        # When we make a request to get quartiles by temperature type
+        request = self.client.get(
+            f'/devices/{self.device_uuid}/readings/quartiles?type=temperature&start={start}&end={end}'
+        )
+
+        # Then the quartile_1 should be 22 and quartile_3 should be 75
+        self.assertEqual(json.loads(request.data)['quartile_1'], 22)
+        self.assertEqual(json.loads(request.data)['quartile_3'], 75)
 
     def tearDown(self):
         db.session.remove()
