@@ -1,4 +1,4 @@
-# Umba Backend Homework Assignment
+# Backend
 
 ## Introduction
 Imagine a system where hundreds of thousands of hardware devices are concurrently uploading temperature and humidity sensor data.
